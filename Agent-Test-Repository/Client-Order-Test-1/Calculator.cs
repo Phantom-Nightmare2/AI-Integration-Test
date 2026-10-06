@@ -57,3 +57,4 @@ namespace ClientOrderTest1
         }
     }
 }
+// テスト ヘラクレスがしました
