@@ -1,24 +1,24 @@
-# Client Order Test 1
+# Client Order Test 1 — VELKRIS C# Ability Test
 
-## Client
-Watson (Fictional Client)
+## クライアント
+ワトソン（架空のクライアント）
 
-## Request
-Please fix the errors in the C# source file included in this task.
+## 依頼先
+VELKRIS
 
-### Requirements
-1. Fix all compile-time and obvious logic errors.
-2. Keep the original purpose of the program.
-3. Add clear `//` comments next to or above every place you fix so the client can understand what was changed.
-4. Do not remove the comments already present in the source file.
-5. After fixing the code, confirm that the program can run correctly.
+## 依頼内容
+[VELKRIS-CSharp-Test.md](VELKRIS-CSharp-Test.md)のC#エラー・バグ対応問題10問に、Q01から順番に回答してください。問題は段階的に難しくなります。
 
-## Goal
-This task is designed to test whether an AI development agent can:
-- understand a client request,
-- locate errors in C# code,
-- repair the code,
-- document each correction with comments,
-- and prepare the result for review.
+## 必須要件
+1. 問題コードを直接修正しないでください。問題文と元のコードをそのまま残してください。
+2. 各問題の下にある「VELKRISの回答」欄に、原因・修正版コード全文・確認方法と結果を書いてください。
+3. 修正版コードの変更箇所には、修正理由を説明するコメントを付けてください。
+4. 必要な調査と動作確認は自律的に行ってください。実行できなかった確認は未実行と明記し、理由と再現可能な手順・予想結果を書いてください。
+5. 提出する変更は `VELKRIS-CSharp-Test.md` の回答欄だけに限定してください。
+6. 既存の `Calculator.cs` は以前の問題とヘラクレスの回答を保存した記録です。今回の回答先ではありません。変更しないでください。
+7. 全10問の回答を記入したらコミットし、提出報告にコミットへのリンクと回答済み問題数を記載してください。自分で採点・合格判定はしないでください。
 
-Do not include any private agent prompts, credentials, API keys, or internal security rules in this public repository.
+## 評価
+各問10点、合計100点。詳細は問題集の採点ルールに従います。原因の特定、要求に沿った修正、確認内容を評価します。
+
+公開リポジトリに秘密のエージェント設定、認証情報、APIキーを記載しないでください。
