@@ -69,14 +69,25 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** `int second = 5` の行末にセミコロンがないため、文が終わらずコンパイルエラー（CS1002: `;` が必要です）になり、プログラムが実行されません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+class Program
+{
+    static void Main()
+    {
+        int first = 10;
+        int second = 5; // 文の終端に必要なセミコロンが抜けていたため追加（CS1002の解消）
+        Console.WriteLine(first + second);
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（.NET SDK 10.0.401、net10.0。問題ごとに作った一時コンソールプロジェクトで実行）。
+- 問題コード `dotnet run` → ビルド失敗: `Program.cs(7,23): error CS1002: ; が必要です`
+- 修正版 `dotnet run` → 出力: `15`（期待値 `15` と一致）
 
 ---
 
@@ -102,14 +113,30 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** コンパイルエラーが2つあります。
+1. `width * hight` の `hight` はスペルミスで、宣言されていない変数です（CS0103）。正しくは `height` です。
+2. `Console.WritLine` はスペルミスで、そのメソッドは存在しません（CS0117）。正しくは `Console.WriteLine` です。
+
+（1の影響で `height` が未使用という警告 CS0219 も出ます。）
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+class Program
+{
+    static void Main()
+    {
+        int width = 6;
+        int height = 4;
+        int area = width * height; // 未定義の変数名 hight を宣言済みの height に修正（CS0103の解消）
+        Console.WriteLine(area); // 存在しないメソッド WritLine を Console.WriteLine に修正（CS0117の解消）
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → ビルド失敗: `Program.cs(8,28): error CS0103: 現在のコンテキストに 'hight' という名前は存在しません` / `Program.cs(9,17): error CS0117: 'Console' に 'WritLine' の定義がありません`（ほかに警告 CS0219）
+- 修正版 `dotnet run` → 出力: `24`（期待値 `24` と一致）
 
 ---
 
@@ -138,14 +165,41 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** 最初の条件が `value >= 0` なので、0 もこの条件に一致して `Positive` と表示されます。そのため `else if (value == 0)` の分岐には到達せず、`Zero` は表示されません。正数の条件は `value > 0` にする必要があります。また、問題コードは `value = 5` に固定されているため、0 と -3 を確認できません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+class Program
+{
+    // 判定処理をメソッドに分離し、5・0・-3 の各ケースを同じロジックで確認できるようにした
+    static string Classify(int value)
+    {
+        if (value > 0) // >= 0 だと 0 も Positive になり Zero の分岐に到達しないため、> 0 に修正
+            return "Positive";
+        else if (value == 0)
+            return "Zero";
+        else
+            return "Negative";
+    }
+    static void Main()
+    {
+        // 要求仕様の確認ケース 5 / 0 / -3 をそれぞれ表示する
+        foreach (int value in new[] { 5, 0, -3 })
+            Console.WriteLine(Classify(value));
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード（`value` を 5 / 0 / -3 に書き換えた一時コピーで実行）→ `Positive` / `Positive` / `Negative`。0 が `Zero` にならない不具合を再現しました。
+- 修正版 `dotnet run` → 出力:
+  ```
+  Positive
+  Zero
+  Negative
+  ```
+- 一時ハーネス（修正版の `Classify` をリフレクションで呼び出して期待値と比較）→ `OK Classify(5): Positive` / `OK Classify(0): Zero` / `OK Classify(-3): Negative`
 
 ---
 
@@ -172,14 +226,29 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** ループ条件が `i <= values.Length` なので、最後に存在しない `values[values.Length]` を読み、`IndexOutOfRangeException` が発生します。有効なインデックスは `0` から `Length - 1` までです。空配列では最初の `values[0]` で例外になり、期待値 0 を返せません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+class Program
+{
+    static int Sum(int[] values)
+    {
+        int total = 0;
+        for (int i = 0; i < values.Length; i++) // <= だと最後に values[Length] へアクセスして IndexOutOfRangeException になるため < に修正（空配列ではループせず 0 を返す）
+            total += values[i];
+        return total;
+    }
+    static void Main() => Console.WriteLine(Sum(new[] { 2, 4, 6 }));
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → `Unhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.`
+- 問題コードをハーネスで実行 → `{2,4,6}`、空配列のどちらも `IndexOutOfRangeException`
+- 修正版 `dotnet run` → 出力: `12`
+- 一時ハーネス（修正版の `Sum` を呼び出して比較）→ `OK Sum({2,4,6}): actual=12` / `OK Sum({}): actual=0`
 
 ---
 
@@ -206,14 +275,34 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：**
+1. `total / values.Length` は int 同士の除算なので、小数部分が切り捨てられます（`3 / 2 = 1`）。戻り値の型は double ですが、変換されるのは切り捨て後です。そのため {1,2} の結果が 1.5 ではなく 1 になります。
+2. 空配列のときに `values.Length` が 0 になり、int の 0 除算で `DivideByZeroException` が発生します。仕様で求められている `ArgumentException` になりません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+class Program
+{
+    static double Average(int[] values)
+    {
+        // 空配列は平均を定義できず、0 除算になるため仕様どおり ArgumentException を投げる
+        if (values.Length == 0)
+            throw new ArgumentException("values must contain at least one element.", nameof(values));
+        int total = 0;
+        foreach (int value in values)
+            total += value;
+        return (double)total / values.Length; // int 同士の除算では小数が切り捨てられるため、double にキャストして小数まで計算する
+    }
+    static void Main() => Console.WriteLine(Average(new[] { 1, 2 }));
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → 出力: `1`（小数が切り捨てられることを再現）
+- 問題コードをハーネスで実行 → `{1,2}`: `1`、`{2,4,6}`: `4`、空配列: `DivideByZeroException`
+- 修正版 `dotnet run` → 出力: `1.5`
+- 一時ハーネス（修正版の `Average` を呼び出し、InvariantCulture で文字列化して比較）→ `OK Average({1,2}): actual=1.5` / `OK Average({2,4,6}): actual=4` / `OK Average({}): actual=ArgumentException`
 
 ---
 
@@ -242,14 +331,68 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：**
+1. `int.Parse` は不正な入力で false を返さず、例外を投げます。null では `ArgumentNullException`、空文字と `abc` では `FormatException`、`2147483648`（int の範囲外）では `OverflowException` が発生します。`text!` の null 許容抑制演算子は警告を消すだけで、null を防ぎません。
+2. 成功条件が `count > 0` なので、有効な入力の `0` が失敗（false）になります。非負を受け付けるには `>= 0` が必要です。
+3. `-1` のように解析できる負数では false を返しますが、`count` には -1 が残ります。失敗時に 0 を返す仕様を満たしません。
+4. 前後の空白は int.Parse の既定でも許容されますが、例外ベースの実装なので、上記の失敗ケースを安全に扱えません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+using System.Globalization; // NumberStyles / CultureInfo を使うため追加
+class Program
+{
+    static bool TryReadCount(string? text, out int count)
+    {
+        // int.Parse は null・空文字・abc・int 範囲外(2147483648)で例外を投げるため、例外を投げない int.TryParse に変更
+        // NumberStyles.Integer は前後の空白と符号を許可する（前後の空白は仕様で許容）
+        // カルチャ依存を避けるため InvariantCulture を指定
+        if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out count)
+            && count >= 0) // 元の count > 0 では 0 が失敗扱いになるため、非負(>= 0)を成功とする
+        {
+            return true;
+        }
+        count = 0; // 失敗時（負数など TryParse は成功したが範囲外のケースを含む）は必ず 0 を返す
+        return false;
+    }
+    static void Main()
+    {
+        Console.WriteLine(TryReadCount("42", out int count));
+        Console.WriteLine(count);
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → `True` / `42`（Main の入力だけでは不具合が表に出ません）
+- 問題コードをハーネスで全入力に対して実行（結果は「戻り値/count」または例外名）:
+  ```
+  FAIL TryReadCount(null): actual=ArgumentNullException expected=False/0
+  FAIL TryReadCount(""): actual=FormatException expected=False/0
+  FAIL TryReadCount("abc"): actual=FormatException expected=False/0
+  FAIL TryReadCount("-1"): actual=False/-1 expected=False/0
+  FAIL TryReadCount("2147483648"): actual=OverflowException expected=False/0
+  FAIL TryReadCount("0"): actual=False/0 expected=True/0
+  OK   TryReadCount("42"): actual=True/42 expected=True/42
+  OK   TryReadCount(" 42 "): actual=True/42 expected=True/42
+  FAIL TryReadCount("\t0\n"): actual=False/0 expected=True/0
+  OK   TryReadCount("2147483647"): actual=True/2147483647 expected=True/2147483647
+  ```
+- 修正版 `dotnet run` → 出力: `True` / `42`
+- 修正版をハーネスで実行:
+  ```
+  OK   TryReadCount(null): actual=False/0 expected=False/0
+  OK   TryReadCount(""): actual=False/0 expected=False/0
+  OK   TryReadCount("abc"): actual=False/0 expected=False/0
+  OK   TryReadCount("-1"): actual=False/0 expected=False/0
+  OK   TryReadCount("2147483648"): actual=False/0 expected=False/0
+  OK   TryReadCount("0"): actual=True/0 expected=True/0
+  OK   TryReadCount("42"): actual=True/42 expected=True/42
+  OK   TryReadCount(" 42 "): actual=True/42 expected=True/42
+  OK   TryReadCount("\t0\n"): actual=True/0 expected=True/0
+  OK   TryReadCount("2147483647"): actual=True/2147483647 expected=True/2147483647
+  ```
 
 ---
 
@@ -283,14 +426,34 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** `foreach` で `List<int>` を列挙している途中に、`values.Remove(value)` で同じリストを変更しています。リストのバージョンが変わるため、次の `MoveNext` で `InvalidOperationException`（Collection was modified）が発生します。仮に例外が出なくても、要素を削除しながら前から走査すると、詰められた要素を飛ばしてしまいます（例: -1 の直後の -2）。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+using System.Collections.Generic;
+class Program
+{
+    static void RemoveNegative(List<int> values)
+    {
+        // foreach で列挙中のリストを Remove で変更すると InvalidOperationException になるため、
+        // 条件に一致する要素を一括削除し残りの順序を保つ RemoveAll に置き換える
+        values.RemoveAll(value => value < 0);
+    }
+    static void Main()
+    {
+        var values = new List<int> { -1, -2, 0, 3, -4 };
+        RemoveNegative(values);
+        Console.WriteLine(string.Join(",", values));
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → `Unhandled exception. System.InvalidOperationException: Collection was modified; enumeration operation may not execute.`
+- 問題コードをハーネスで実行 → `{-1,-2,0,3,-4}`、`{-5,-6}`、`{1,-1,2}` は `InvalidOperationException`。空リストは `{}`（ループしないため）。
+- 修正版 `dotnet run` → 出力: `0,3`
+- 修正版をハーネスで実行 → `OK {-1,-2,0,3,-4} → {0,3}` / `OK {} → {}` / `OK {-5,-6} → {}` / `OK {1,-1,2} → {1,2}`（順序が保たれることも確認）
 
 ---
 
@@ -322,14 +485,49 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：** LINQ の `Where` は遅延実行です。`captured` に入るのは結果ではなく「列挙時に元リストを絞り込むクエリ」です。実際の評価は `values.Add(6)` の後の列挙時に行われるため、追加された 6 も含まれて `2,4,6` になります。さらに、列挙するたびに元リストの現在の内容を読み直すため、呼び出し後に元リストが変わると戻り値の内容も変わり、「何度列挙しても同じ内容」になりません。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class Program
+{
+    static IEnumerable<int> CaptureEvenAndAppend(List<int> values)
+    {
+        // Where は遅延実行で、列挙時に Add 後のリストを読むため 6 まで含まれてしまう。
+        // ToList() で Add 前にその場で評価し、偶数のスナップショット（元の順番）を確定させる。
+        // 戻り値は独立した List なので、何度列挙しても同じ内容になる。
+        var captured = values.Where(value => value % 2 == 0).ToList();
+        values.Add(6);
+        return captured;
+    }
+    static void Main()
+    {
+        var values = new List<int> { 1, 2, 3, 4 };
+        Console.WriteLine(string.Join(",", CaptureEvenAndAppend(values)));
+    }
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → 出力: `2,4,6`
+- 問題コードをハーネスで実行 → 入力 {1,2,3,4}: 戻り値は3回の列挙とも `{2,4,6}`、元リストに 8 を追加した後は `{2,4,6,8}` に変化。入力 {}: 戻り値 `{6}`、8 を追加した後は `{6,8}`。
+- 修正版 `dotnet run` → 出力: `2,4`
+- 修正版をハーネスで実行（戻り値を3回列挙し、さらに元リストに `Add(8)` してから再列挙）:
+  ```
+  OK   input {1,2,3,4} return enum#1: actual={2,4} expected={2,4}
+  OK   input {1,2,3,4} return enum#2: actual={2,4} expected={2,4}
+  OK   input {1,2,3,4} return enum#3: actual={2,4} expected={2,4}
+  OK   input {1,2,3,4} source list: actual={1,2,3,4,6} expected={1,2,3,4,6}
+  OK   input {1,2,3,4} return after extra Add(8): actual={2,4} expected={2,4}
+  OK   input {} return enum#1: actual={} expected={}
+  OK   input {} return enum#2: actual={} expected={}
+  OK   input {} return enum#3: actual={} expected={}
+  OK   input {} source list: actual={6} expected={6}
+  OK   input {} return after extra Add(8): actual={} expected={}
+  ```
 
 ---
 
@@ -361,14 +559,41 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：**
+1. `ReadAsync` 内の `Task.Delay(20);` が await されていません（警告 CS4014）。遅延タスクを作るだけで完了を待たないため、`ReadAsync` は待機せず同期的に完了して即座に値を返します。仕様の「Task.Delay は完了を待つ」を満たしていません。
+2. `CalculateAsync` は async メソッドですが、`first.Result + second.Result` で同期的にブロックしています。async メソッド内で `.Result` を使うと、待機中にスレッドを占有します。さらに SynchronizationContext のある環境（UI や旧 ASP.NET など）ではデッドロックの原因になります。例外も `AggregateException` に包まれます。await を使って非同期に待つ必要があります。
+
+（問題コードでも出力は 42 ですが、それは遅延を待っていないために Result 時点でタスクが既に完了しているからです。）
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+using System.Threading.Tasks;
+class Program
+{
+    static async Task<int> ReadAsync(int value)
+    {
+        await Task.Delay(20); // Task.Delay を await していなかったため遅延の完了を待たずに戻っていた。await で完了を待つ
+        return value;
+    }
+    static async Task<int> CalculateAsync()
+    {
+        Task<int> first = ReadAsync(20);
+        Task<int> second = ReadAsync(22);
+        // .Result は同期的にスレッドをブロックし、デッドロックの原因にもなるため使わず、
+        // 両方のタスクを開始済みのまま await で完了を待ってから合計する
+        return await first + await second;
+    }
+    static async Task Main() => Console.WriteLine(await CalculateAsync());
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet build` → `Program.cs(7,9): warning CS4014: この呼び出しを待たないため、…`。`dotnet run` → 出力: `42`
+- 問題コードをハーネスで実行 → `ReadAsync(20)` は呼び出し直後に `IsCompleted=True`（遅延を待たずに同期完了）。`CalculateAsync` は3回とも `42` だが、所要時間は `0ms`。
+- 修正版 `dotnet build --no-incremental` → `0 個の警告` / `0 エラー`。`dotnet run` → 出力: `42`
+- 修正版をハーネスで実行 → `OK ReadAsync(20) IsCompleted immediately after call: actual=False`（遅延を待っている）、`OK await ReadAsync(20): 20`、`CalculateAsync` を3回実行して結果はすべて `42`（所要時間 30ms / 30ms / 34ms。2つの 20ms 遅延を並行に待ってから合計していることを確認）
+- 修正版ソースを `grep -nE "Thread\.Sleep|\.Wait\(|\.Result"` で検索 → 一致は14行目のコメント（`.Result を使わない` 理由の説明）だけで、コード上の使用はありません。
 
 ---
 
@@ -404,14 +629,42 @@ class Program
 
 ### VELKRISの回答
 
-**原因：** 未回答
+**原因：**
+1. `Task.WhenAll(tasks);` の戻り値を await していません（警告 CS4014）。全タスクの完了を待たずに、すぐ `return count;` が実行されます。そのため、加算がほとんど進んでいない値（実測では 0）が返ります。
+2. `count++` は「読み取り→加算→書き込み」の非原子的な操作です。100個のタスクが同じキャプチャ変数を同時に更新すると、更新が上書きされて失われます（競合状態）。完了を待つようにしても、100000 未満の値になります。
 
 **修正版コード：**
 ```csharp
-// ここに修正版コード全文を記入してください。
+using System;
+using System.Threading; // Interlocked を使うため追加
+using System.Threading.Tasks;
+class Program
+{
+    static async Task<int> CountAsync()
+    {
+        int count = 0; // 呼び出しごとに独立させるためローカル変数のまま
+        var tasks = new Task[100];
+        for (int i = 0; i < tasks.Length; i++)
+        {
+            tasks[i] = Task.Run(() =>
+            {
+                for (int j = 0; j < 1000; j++)
+                    Interlocked.Increment(ref count); // count++ は読み取り・加算・書き込みが非原子的で複数タスク間で更新が失われるため、原子的な Interlocked.Increment に変更
+            });
+        }
+        await Task.WhenAll(tasks); // WhenAll の戻り値を await しておらず全タスク完了前に count を返していたため、await で完了を待つ
+        return count;
+    }
+    static async Task Main() => Console.WriteLine(await CountAsync());
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：** 実行済み（一時コンソールプロジェクト、net10.0）。
+- 問題コード `dotnet run` → 警告 CS4014、出力: `0`
+- 問題コードをハーネスで実行 → 連続10回の呼び出しはすべて `0`、同時5回の呼び出しは `0,0,0,0,0`
+- 競合状態の切り分け: 問題コードの `Task.WhenAll` にだけ `await` を付けた一時コピー（`count++` はそのまま）を5回呼び出し → `27605` / `23012` / `20120` / `15513` / `15696`。完了を待っても `count++` の競合で更新が失われることを再現しました。
+- 修正版 `dotnet build --no-incremental` → `0 個の警告` / `0 エラー`。`dotnet run` → 出力: `100000`
+- 修正版をハーネスで実行 → 連続10回の呼び出しはすべて `OK 100000`。`Task.WhenAll` で同時に5回呼び出した結果も `OK 100000,100000,100000,100000,100000`（ローカル変数なので呼び出しごとに独立していることを確認）
 
 ---
 
