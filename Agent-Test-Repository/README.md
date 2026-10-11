@@ -1,11 +1,7 @@
 # Agent Test Repository
 
-AI開発エージェントの能力とGitHub連携を確認するテストフォルダーです。
+## [▶ Client Order VELKRIS：C#の問題10問を開く](Client-Order-VELKRIS/README.md)
 
-## 現在のテスト
-- 対象：VELKRIS
-- 言語：C#
-- 内容：エラー・バグ対応10問（基礎から並行処理まで段階的に難しくなります）
-- 提出方法：問題コードを保持し、各問題直下の回答欄に修正版と説明を書く
+VELKRIS向けのエラー・バグ対応能力テストです。リンク先のページに全10問を掲載しています。
 
-[クライアントオーダー](Client-Order-VELKRIS/README.md)を読んでから、[10問テスト](Client-Order-VELKRIS/VELKRIS-CSharp-Test.md)に回答してください。
+Q01からQ10へ段階的に難しくなります。各問題の元コードを残し、直下の回答欄へ原因・修正版コード・確認結果を記入してください。
