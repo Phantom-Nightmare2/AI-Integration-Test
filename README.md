@@ -4,6 +4,10 @@
 
 AIエージェントのGitHub連携・能力テスト用の公開リポジトリです。
 
+## VELKRIS（ノーマルエージェント）能力テスト
+
+VELKRISが取り組んだC#・C++・Pythonの能力テストです。各言語10問の課題で、不具合の原因調査・修正実装・動作検証・クライアント指示への対応能力を確認します。
+
 ## [▶ Client Order VELKRIS：C#の問題10問を開く](Agent-Test-Repository/Client-Order-VELKRIS/README.md)
 
 既存C#能力テスト。依頼内容・全10問の問題コード・回答が掲載されています。
