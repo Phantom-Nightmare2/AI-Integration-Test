@@ -47,14 +47,25 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** `int second = 5` の文末にセミコロンがなく、次行の `std::cout` と1つの文として解析されてコンパイルエラーになる（MSVC: `error C2143: 構文エラー: ';' が 'std::cout' の前にありません`）。ロジック上の問題はなく、セミコロンを補えば仕様どおり `15` を表示する。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+
+int main()
+{
+    int first = 10;
+    int second = 5; // 修正: 文末のセミコロンが欠落して構文エラーになっていたため補った
+    std::cout << first + second << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 共通の検証環境：Windows 11 / MSVC 19.51.36260（Visual Studio 18 Community, x64）、`cl /std:c++17 /EHsc /W4 /WX /permissive- /utf-8`。問題ごとにリポジトリ外の独立した一時フォルダで検証し、検証用ファイルは提出していない（Q02〜Q10も同じ）。
+- 元コード：コンパイルのみ実施（実行不可）→ `error C2143` を確認。
+- 修正版：警告なしでビルド成功。実行結果 `15`（期待値 `15`）、終了コード0。**検証済み・一致。**
 
 ---
 
@@ -84,14 +95,31 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** `Increase(int value)` は値渡しのため、関数内の `value += 1` は引数のコピーを変更するだけで、呼び出し元の `first`・`second` は変わらない。元コードを実行すると `8,0` と表示され、期待値 `9,1` にならない。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+
+void Increase(int& value) // 修正: 値渡し(int)ではコピーが増えるだけなので、参照渡し(int&)にして呼び出し元の変数を更新する
+{
+    value += 1;
+}
+
+int main()
+{
+    int first = 8;
+    int second = 0;
+    Increase(first);
+    Increase(second);
+    std::cout << first << "," << second << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード（実行しても未定義動作のない、定義済みの動作）：実行結果 `8,0` → 不具合を再現。
+- 修正版：警告なしでビルド成功。実行結果 `9,1`（期待値 `9,1`）。8→9、0→1 を確認。**検証済み・一致。**
 
 ---
 
@@ -121,14 +149,53 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：**
+1. `total / values.size()` は `int` と `std::size_t` の演算で、`total` が符号なし整数に変換されて整数除算になり、小数が切り捨てられる（`{1,2}` → `1`）。合計が負なら巨大な値にもなる。`double` で返しても除算後の変換なので手遅れ。
+2. 空配列では `size()==0` でゼロ除算（未定義動作）になり、仕様の `std::invalid_argument` も送出されない。
+3. 表示面：`std::cout` の既定書式では `4.0` が `4` と表示されるため、確認用に小数1桁固定で出力する。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iomanip>
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <stdexcept>
+
+double Average(const std::vector<int>& values)
+{
+    // 修正: 空配列はゼロ除算になるため、要求仕様どおり std::invalid_argument を送出する
+    if (values.empty())
+        throw std::invalid_argument("values must not be empty");
+
+    int total = std::accumulate(values.begin(), values.end(), 0);
+    // 修正: int / std::size_t は符号なし整数どうしの除算になり小数が切り捨てられる（負の合計では巨大値にもなる）。
+    //       両辺を double に変換してから割る
+    return static_cast<double>(total) / static_cast<double>(values.size());
+}
+
+int main()
+{
+    // 修正: 4.0 が "4" ではなく "4.0" と表示されるよう、小数1桁固定で出力する
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << Average({1, 2}) << '\n';
+    std::cout << Average({2, 4, 6}) << '\n';
+    try
+    {
+        Average({});
+    }
+    catch (const std::invalid_argument&)
+    {
+        std::cout << "invalid_argument\n";
+    }
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード：コンパイル時に警告 C4244（`unsigned __int64` → `double` 変換）。実行結果 `1`（期待値 `1.5`）→ 不具合を再現。空配列の呼び出しはゼロ除算の未定義動作になるため実行していない。
+- 修正版：警告なしでビルド成功。実行結果 `1.5` / `4.0` / `invalid_argument`（期待値と一致）。
+- 別の検証用プログラムで関数を直接テスト：`{1,2}`→1.5、`{2,4,6}`→4.0、`{-1,-2}`→-1.5、`{}`→`std::invalid_argument` 送出。4件すべて合格。**検証済み。**
 
 ---
 
@@ -160,14 +227,37 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** ループ条件が `i <= values.size()` のため、最後に `values.at(values.size())` を参照し、`at` の境界チェックで `std::out_of_range` が送出される（キャッチされず異常終了）。空の `vector` でも `at(0)` で同じく例外になり、`0` を返せない。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+#include <vector>
+
+int Sum(const std::vector<int>& values)
+{
+    int total = 0;
+    // 修正: i <= values.size() では最後に values.at(size()) を参照して std::out_of_range になる（空配列でも at(0) で例外）。
+    //       範囲for文で実在する要素だけを走査し、境界外アクセスをなくす。空なら 0 のまま返る
+    for (int value : values)
+    {
+        total += value;
+    }
+    return total;
+}
+
+int main()
+{
+    std::cout << Sum({2, 4, 6}) << '\n';
+    std::cout << Sum({}) << '\n'; // 修正: 空入力のケースも確認できるよう表示を追加
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード：コードを読んで原因を確認し、実行は省略（キャッチされない `std::out_of_range` により `std::terminate` で異常終了するのが予想される結果）。
+- 修正版：警告なしでビルド成功。実行結果 `12` と `0`（期待値と一致）。
+- 別の検証用プログラム：`{2,4,6}`→12、`{}`→0、`{7}`→7、`{-3,3}`→0。4件すべて合格。**検証済み。**
 
 ---
 
@@ -203,14 +293,41 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** `std::remove_if` は削除しない要素を前に詰めて「新しい論理的な終端」のイテレーターを返すだけで、`vector` の要素数は変えない。戻り値を捨てているため、末尾に残った要素がそのまま残る（元コードの実行結果は `2,0,5,0,5`）。MSVCも警告 C4858（戻り値の破棄）を出す。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+void RemoveNegative(std::vector<int>& values)
+{
+    // 修正: std::remove_if は残す要素を前へ詰めて新しい論理的終端を返すだけで、要素数は変えない（戻り値も捨てていた）。
+    //       戻り値から end() までを erase する erase-remove イディオムで実際に削除する。remove_if は安定なので順番も保持される
+    values.erase(std::remove_if(values.begin(), values.end(),
+                                [](int value) { return value < 0; }),
+                 values.end());
+}
+
+int main()
+{
+    std::vector<int> values{-1, 2, -3, 0, 5};
+    RemoveNegative(values);
+    for (std::size_t i = 0; i < values.size(); ++i)
+    {
+        if (i != 0) std::cout << ",";
+        std::cout << values[i];
+    }
+    std::cout << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード（定義済みの動作）：実行結果 `2,0,5,0,5`、警告 C4858 → 不具合を再現。
+- 修正版：警告なしでビルド成功。実行結果 `2,0,5`（期待値と一致）。
+- 別の検証用プログラム：`{-1,2,-3,0,5}`→`{2,0,5}`、空→空、`{-2,-1}`→空、`{3,1,2}`→`{3,1,2}`（順番を保持）。4件すべて合格。**検証済み。**
 
 ---
 
@@ -241,14 +358,69 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：**
+1. `std::stoi` は `""`・`"abc"` で `std::invalid_argument`、`"2147483648"` で `std::out_of_range` を送出し、`false/0` を返せない（例外で異常終了する）。
+2. `std::stoi` は先頭の符号を受理する（`"+42"`→42、`"-1"`→-1）。また、数値の後ろの不要文字を黙って無視する（`"42x"`→42）。
+3. `return count > 0;` のため `"0"` が失敗扱いになる。さらに失敗時に `count` が0にならない（`"-1"` なら -1 のまま）。
+
+`std::from_chars`（例外を送出せず、ロケールにも依存しない）で変換し、先頭が数字であることと全文字を消費したことを確認する方式に変更した。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <charconv>
+#include <iostream>
+#include <string>
+#include <system_error>
+
+// 修正: std::isspace はロケール依存で、負の char 値では未定義動作になり得るため、ASCII空白を明示的に判定する
+bool IsAsciiSpace(char c)
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
+}
+
+bool TryReadCount(const std::string& text, int& count)
+{
+    // 修正: 失敗時は必ず count = 0 を返す仕様のため、最初に 0 にしておく
+    count = 0;
+
+    // 修正: 前後のASCII空白だけを取り除く（数字の間の空白は後段の全文字消費チェックで不正になる）
+    std::size_t first = 0;
+    std::size_t last = text.size();
+    while (first < last && IsAsciiSpace(text[first])) ++first;
+    while (last > first && IsAsciiSpace(text[last - 1])) --last;
+
+    // 修正: 空文字・空白のみ・符号(+/-)・数字以外で始まる文字列を拒否する
+    //       （std::stoi は "+42" や "-1" を受理し、"" や "abc" では std::invalid_argument を送出していた）
+    if (first == last || text[first] < '0' || text[first] > '9')
+        return false;
+
+    const char* begin = text.data() + first;
+    const char* end = text.data() + last;
+    int value = 0;
+    // 修正: 例外を送出しない std::from_chars（10進）で変換する。
+    //       int の範囲外（"2147483648" など）は std::errc::result_out_of_range として検出できる
+    const auto [ptr, ec] = std::from_chars(begin, end, value, 10);
+    // 修正: std::stoi は "42x" の末尾の不要文字を黙って無視していたため、全文字を消費したかを確認する
+    if (ec != std::errc() || ptr != end)
+        return false;
+
+    // 修正: 元の count > 0 では "0" が失敗扱いになっていた。先頭が数字なので value は必ず 0 以上で、0 も成功とする
+    count = value;
+    return true;
+}
+
+int main()
+{
+    int count = 0;
+    std::cout << TryReadCount("42", count) << "," << count << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード：`main` の `"42"` だけを実行→ `1,42`（このケースだけは偶然正しい）。`""`・`"abc"`・`"2147483648"` は例外で異常終了するため、元コードでは実行していない。
+- 修正版：警告なしでビルド成功。実行結果 `1,42`（期待値と一致）。
+- 別の検証用プログラムで、結果（true/false）と `count` の両方を確認：`"42"`→true/42、`"0"`→true/0、`" 42 "`→true/42、`"\t42\r\n"`→true/42、`"2147483647"`→true/2147483647、`"007"`→true/7、`""`・`"   "`・`"abc"`・`"-1"`・`"+42"`・`"42x"`・`"4 2"`・`"2147483648"`・`"99999999999999999999"`・`"4\0" "2"`（NULを含む）→ すべて false/0。16件すべて合格。**検証済み。**
 
 ---
 
@@ -281,14 +453,40 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** `scores[name]` の `operator[]` は、キーが存在しないとき値0の要素を**挿入して**から参照を返す。そのため、未登録の `"Mio"` を検索すると件数が2→3に増え、戻り値も `0` を持つ `optional` になるので、0点（Amy）と未登録を区別できない。元コードの実行結果は `1,3`（期待値 `0,2`）。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+#include <optional>
+#include <string>
+#include <unordered_map>
+
+std::optional<int> FindScore(
+    const std::unordered_map<std::string, int>& scores, // 修正: 検索で map を変更しないことを型で保証するため const 参照にする
+    const std::string& name)
+{
+    // 修正: operator[] は未登録キーを値 0 で挿入してしまうため、件数が増え、0点と未登録も区別できなかった。
+    //       find で検索し、見つからなければ std::nullopt を返す
+    const auto it = scores.find(name);
+    if (it == scores.end())
+        return std::nullopt;
+    return it->second;
+}
+
+int main()
+{
+    std::unordered_map<std::string, int> scores{{"Amy", 0}, {"Kai", 75}};
+    auto missing = FindScore(scores, "Mio");
+    std::cout << missing.has_value() << "," << scores.size() << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード（定義済みの動作）：実行結果 `1,3` → 不具合を再現。
+- 修正版：警告なしでビルド成功。実行結果 `0,2`（未登録 → `has_value()==false`、件数2）。
+- 別の検証用プログラム：Amy→値あり・0、Kai→値あり・75、Mio→`std::nullopt`、最終件数→2。4件すべて合格。**検証済み。**
 
 ---
 
@@ -321,14 +519,43 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** `std::unique_ptr` は所有権を1つだけ持つため、コピー代入演算子が削除されている。`target = source;` はコピーしようとするのでコンパイルエラーになる（MSVC: `error C2280: 削除された関数を参照しようとしています`）。所有権の移動には `std::move` が必要。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+void TransferAndAppend(std::unique_ptr<std::string>& source,
+                       std::unique_ptr<std::string>& target)
+{
+    // 修正: 前提（source は非null）に反する呼び出しでは null 参照外しを避け、何も変更せずに例外を送出する
+    if (!source)
+        throw std::invalid_argument("source must not be null");
+
+    // 修正: unique_ptr はコピー代入が削除されているためコンパイルエラーになっていた。std::move で所有権を移動する。
+    //       移動後 source は nullptr になり、target が以前所有していた文字列は自動的に解放される
+    target = std::move(source);
+    target->append("!");
+}
+
+int main()
+{
+    auto source = std::make_unique<std::string>("Ready");
+    std::unique_ptr<std::string> target;
+    TransferAndAppend(source, target);
+    std::cout << *target << "," << (source == nullptr) << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード：コンパイルのみ実施（実行不可）→ `error C2280` を確認。
+- 修正版：警告なしでビルド成功。実行結果 `Ready!,1`（`source == nullptr` が true）。
+- 別の検証用プログラム：①`"Ready"`、`target` が null → `"Ready!"`、`source` は null。②`"Go"`、`target` が別の文字列 `"Old"` を所有 → `"Go!"`、`source` は null。移動前後で文字列オブジェクトのアドレスが同じ（コピーではなく所有権の移動である）ことも確認。③前提外の null `source` → `std::invalid_argument` を送出し、`target` は `"Keep"` のまま。7件すべて合格。**検証済み。**
 
 ---
 
@@ -374,14 +601,60 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** 検証と追加を同じループで行っているため、負数を検出した時点で、その手前の要素がすでに `destination` に `push_back` されている。`{10}` + `{2,-1,3}` では例外の後に `destination` が `{10,2}` になり、「変更前と完全に同じ」という要件（強い例外保証）を満たさない。また、`push_back` の途中でメモリ確保に失敗（`std::bad_alloc`）した場合も、一部だけ追加された状態が残る。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+
+void AppendNonNegative(std::vector<int>& destination,
+                       const std::vector<int>& incoming)
+{
+    // 修正: 元コードは検証と追加を同じループで行うため、負数の手前の要素が追加された状態で例外が出ていた。
+    //       追加の前に全要素を検証し、負数があれば destination に一切触れずに送出する
+    if (std::any_of(incoming.begin(), incoming.end(),
+                    [](int value) { return value < 0; }))
+        throw std::invalid_argument("Negative values are not allowed");
+
+    // 修正: 空の incoming なら変更なし（不要なコピーも避ける）
+    if (incoming.empty())
+        return;
+
+    // 修正: 強い例外保証のため、作業用コピーに追加してから例外を送出しない swap で反映する。
+    //       メモリ確保で std::bad_alloc が出ても destination は変更前のまま。
+    //       incoming と destination が同じオブジェクトでも、作業用コピー側に追加するので安全
+    std::vector<int> result;
+    result.reserve(destination.size() + incoming.size());
+    result.insert(result.end(), destination.begin(), destination.end());
+    result.insert(result.end(), incoming.begin(), incoming.end());
+    destination.swap(result);
+}
+
+int main()
+{
+    std::vector<int> values{10};
+    try
+    {
+        AppendNonNegative(values, {2, -1, 3});
+    }
+    catch (const std::invalid_argument&)
+    {
+        std::cout << "rejected\n";
+    }
+    for (int value : values) std::cout << value << " ";
+    std::cout << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード（定義済みの動作）：実行結果 `rejected` / `10 2` → 不具合を再現。
+- 修正版：警告なしでビルド成功。実行結果 `rejected` / `10`（期待値と一致）。
+- 別の検証用プログラム：`{10}`+`{2,3}`→`{10,2,3}`。`{10}`+`{2,-1,3}`→例外が送出され、内容は `{10}` のまま、容量も変化なし。`{10}`+`{}`→変更なし。自分自身を追加（`d`+`d`、`{1,2}`）→`{1,2,1,2}`。空+`{0,5}`→`{0,5}`（0は非負として受理）。7件すべて合格。
+- 未検証：`std::bad_alloc` の発生時の動作は、確保失敗を再現する仕組みがないため実行していない。設計上は、作業用コピーで確保に失敗した場合 `destination` に触れる前に例外が伝わり、反映は例外を送出しない `swap` だけなので、変更前の状態が保たれる。**上記以外は検証済み。**
 
 ---
 
@@ -421,14 +694,68 @@ int main()
 ```
 
 ### VELKRISの回答
-**原因：** 未回答
+**原因：** 100個のスレッドが共有の `int count` を同期なしで `++count` しており、データ競合（未定義動作）になる。`++` は読み込み・加算・書き込みの3段階で不可分ではないため、加算が失われ、結果が `100000` 未満になり得る。修正では `std::atomic<int>` で各加算を不可分にした。加えて、スレッドを生成している途中で例外が出た場合に、join されていない `std::thread` が破棄されて `std::terminate` になるのを防ぐため、RAIIで全スレッドを必ず join するようにした。
 
 **修正版コード：**
 ```cpp
-// ここに修正版コード全文を記入してください。
+#include <atomic>
+#include <iostream>
+#include <thread>
+#include <vector>
+
+// 修正: スレッド生成の途中で例外（std::system_error など）が出ても、起動済みスレッドを必ず join するためのRAIIガード。
+//       joinable な std::thread を join せずに破棄すると std::terminate になるため
+class JoinAll
+{
+public:
+    explicit JoinAll(std::vector<std::thread>& threads) : threads_(threads) {}
+    ~JoinAll()
+    {
+        for (auto& thread : threads_)
+            if (thread.joinable())
+                thread.join();
+    }
+    JoinAll(const JoinAll&) = delete;
+    JoinAll& operator=(const JoinAll&) = delete;
+
+private:
+    std::vector<std::thread>& threads_;
+};
+
+int Count()
+{
+    // 修正: 複数スレッドから非アトミックな int を ++ するのはデータ競合（未定義動作）で、加算が失われる。
+    //       std::atomic<int> にして各加算を不可分にする。カウンターは呼び出しごとのローカル変数なので、
+    //       Count を別々に同時実行しても互いに干渉しない
+    std::atomic<int> count{0};
+    std::vector<std::thread> workers;
+    workers.reserve(100);
+    {
+        JoinAll joinGuard(workers); // 修正: 正常時も例外時も、このスコープを抜けるときに全スレッドの終了を待つ
+        for (int i = 0; i < 100; ++i)
+        {
+            workers.emplace_back([&count]()
+            {
+                for (int j = 0; j < 1000; ++j)
+                    count.fetch_add(1, std::memory_order_relaxed); // 修正: 不可分な加算。最終値は join による同期で確定するため relaxed で十分
+            });
+        }
+    } // 修正: ここで全スレッドが join 済みになってから値を読む
+    return count.load();
+}
+
+int main()
+{
+    std::cout << Count() << '\n';
+    return 0;
+}
 ```
 
-**確認方法・結果：** 未回答
+**確認方法・結果：**
+- 元コード：データ競合という未定義動作を含むため、ルールに従い実行していない。予想される結果は「`100000` 以下の不定の値（実行ごとに変わり得る）」。
+- 修正版：警告なしでビルド成功。実行結果 `100000`。
+- 別の検証用プログラム：①`Count()` を連続10回呼び出し → すべて `100000`。②`std::async(std::launch::async, Count)` で4つの `Count` を同時に実行 → それぞれ `100000`。14件すべて合格。**検証済み。**
+- 補足（未実施）：MSVCにはThreadSanitizerがないため、競合検出ツールによる検査は行っていない。再現手順：Linux の clang/gcc で `-std=c++17 -fsanitize=thread` を付けて同じプログラムをビルド・実行する。予想結果は、元コードではデータ競合の警告が出て、修正版では警告が出ない。
 
 ---
 
