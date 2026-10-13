@@ -11,9 +11,3 @@ VELKRIS向けのC#エラー・バグ対応能力テストです。リンク先�
 ## [▶ Client Order VELKRIS：Pythonの問題10問を開く](Client-Order-VELKRIS/VELKRIS-Python-Test.md)
 
 C++より複雑な条件を含むPython 3.11以上の能力テストです。10問とクライアントオーダーを収録。各問題の元コードを保ったまま、指定の回答欄に原因・修正版コード・検証結果を記入してください。GitHubへのpushは所有者の明示指示がある場合のみ行ってください。
-
-## ★ヘラクレスエージェント能力テスト
-
-[▶ Python確認テスト（全10問・100点満点）を開く](Client-Order-HERCULES/HERCULES-Python-Confirmation-Test.md)
-
-★HERCULES専用のPython確認テストです。[専用のテスト一覧ページ](Client-Order-HERCULES/README.md)からも開けます。元の問題コードは変更せず、指定の回答欄へ原因・修正版コード・検証結果を記入してください。
