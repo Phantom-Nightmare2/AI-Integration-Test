@@ -17,3 +17,7 @@ AIエージェントのGitHub連携・能力テスト用の公開リポジトリ
 ## [▶ Client Order VELKRIS：Pythonの問題10問を開く](Agent-Test-Repository/Client-Order-VELKRIS/VELKRIS-Python-Test.md)
 
 **Python 3.11以上の応用能力テスト**。参照・コピー、日時処理、Decimal、SQLite、ファイル安全性、非同期リトライ等の新規10問とクライアントオーダーを収録しています。
+
+## [▶ Client Order ★HERCULES：Python確認テスト10問を開く](Agent-Test-Repository/Client-Order-HERCULES/HERCULES-Python-Confirmation-Test.md)
+
+**★HERCULES専用・Python確認テスト（100点満点）**。C++確認テストと同等レベルを目安に、構文・アルゴリズム・例外・キャッシュ・CSV・SQLite・原子的ファイル保存・スレッド・asyncioまで10問を収録。問題の要求仕様とコードは変更せず、指定された回答欄に原因・修正版コード全文・検証結果を記入してください。GitHubへのpushは所有者の明示許可がある場合だけです。
