@@ -28,17 +28,17 @@ VELKRISが取り組んだC#・C++・Pythonの能力テストです。各言語10
 
 ★HERCULES（スターエージェント）の実務を想定した能力テストです。C#・C++・Pythonの3言語で、エラー・バグの原因調査、修正・実装、動作検証、指示への対応能力を評価します。**各言語10問・100点満点**です。
 
-**[▶ ★HERCULESの能力テスト総合案内を開く](Agent-Test-Repository/Client-Order-HERCULES/★HERCULES-Test.md)**
+**[▶ ★HERCULESの能力テスト総合案内を開く](Agent-Test-Repository/Client-Order-★HERCULES/★HERCULES-Test.md)**
 
-### [▶ ★HERCULES：C#能力テスト10問を開く](Agent-Test-Repository/Client-Order-HERCULES/Client-Order-HERCULES.md)
+### [▶ ★HERCULES：C#能力テスト10問を開く](Agent-Test-Repository/Client-Order-★HERCULES/Client-Order-HERCULES.md)
 
 **C# / .NET 8｜難易度：中級〜上級｜10問・100点満点。** 数値処理、売上集計、データ操作、JSON復旧、非同期処理、競合状態、デッドロックなどの不具合調査・修正・検証を行います。
 
-### [▶ ★HERCULES：C++高難度テスト10問を開く](Agent-Test-Repository/Client-Order-HERCULES/★ヘラクレスC++テスト10問.md)
+### [▶ ★HERCULES：C++高難度テスト10問を開く](Agent-Test-Repository/Client-Order-★HERCULES/★ヘラクレスC++テスト10問.md)
 
 **C++17（標準ライブラリ）｜難易度：上級〜最難関｜10問・100点満点。** 所有権・メモリ安全性・例外安全性・イテレーター・データ競合・スレッドプールの停止制御など、高度なデバッグ能力を評価します。
 
-### [▶ ★HERCULES：Python確認テスト10問を開く](Agent-Test-Repository/Client-Order-HERCULES/HERCULES-Python-Confirmation-Test.md)
+### [▶ ★HERCULES：Python確認テスト10問を開く](Agent-Test-Repository/Client-Order-★HERCULES/HERCULES-Python-Confirmation-Test.md)
 
 **Python 3.11以上（標準ライブラリ）｜難易度：上級〜最難関｜10問・100点満点。** 入力検証、状態復元、CSV・SQLite処理、ファイル安全性、スレッド並行処理、asyncioのタイムアウト・キャンセル制御を含む問題を扱います。
 

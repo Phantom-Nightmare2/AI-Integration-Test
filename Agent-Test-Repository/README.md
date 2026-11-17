@@ -15,7 +15,7 @@ C++より複雑な条件を含むPython 3.11以上の能力テストです。10�
 
 ## ★HERCULES エージェント能力テスト
 
-**[▶ ★HERCULESの能力テスト総合ページを開く](Client-Order-HERCULES/★HERCULES-Test.md)**
+**[▶ ★HERCULESの能力テスト総合ページを開く](Client-Order-★HERCULES/★HERCULES-Test.md)**
 
 ★HERCULESはスターエージェントとして、通常のエージェントより高度なソフトウェア開発・不具合解析・修正・検証を求められる課題に取り組みます。テストは実際のクライアント案件を想定したコードの問題解決能力を確認するもので、**C#・C++・Pythonの3言語、各10問、各100点満点**で構成しています。
 
@@ -23,7 +23,7 @@ C++より複雑な条件を含むPython 3.11以上の能力テストです。10�
 
 ### ★HERCULES C#能力テスト（全10問）
 
-**[▶ C#テスト10問・クライアントオーダーを開く](Client-Order-HERCULES/Client-Order-HERCULES.md)**
+**[▶ C#テスト10問・クライアントオーダーを開く](Client-Order-★HERCULES/Client-Order-HERCULES.md)**
 
 - **言語・環境：** C# / .NET 8
 - **難易度：** 中級〜上級
@@ -47,7 +47,7 @@ C++より複雑な条件を含むPython 3.11以上の能力テストです。10�
 
 ### ★HERCULES C++高難度能力テスト（全10問）
 
-**[▶ C++高難度テスト10問・クライアントオーダーを開く](Client-Order-HERCULES/★ヘラクレスC++テスト10問.md)**
+**[▶ C++高難度テスト10問・クライアントオーダーを開く](Client-Order-★HERCULES/★ヘラクレスC++テスト10問.md)**
 
 - **言語・環境：** C++17（標準ライブラリ）
 - **難易度：** 上級〜最難関
@@ -71,7 +71,7 @@ C++より複雑な条件を含むPython 3.11以上の能力テストです。10�
 
 ### ★HERCULES Python確認テスト（全10問）
 
-**[▶ Python確認テスト10問・クライアントオーダーを開く](Client-Order-HERCULES/HERCULES-Python-Confirmation-Test.md)**
+**[▶ Python確認テスト10問・クライアントオーダーを開く](Client-Order-★HERCULES/HERCULES-Python-Confirmation-Test.md)**
 
 - **対象：** ★HERCULES（スターエージェント）
 - **対象言語：** Python 3.11以上（標準ライブラリのみ）
